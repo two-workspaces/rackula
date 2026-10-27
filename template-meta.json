@@ -5,5 +5,6 @@
   "category": "Other",
   "image": "https://raw.githubusercontent.com/two-workspaces/rackula/main/icon.png",
   "card_desc": "Rackula: a visual rack layout designer for homelabs and server rooms. Drag real devices from the NetBox library into racks, plan power and cabling, export images and PDFs. Layouts saved server-side behind a password.",
-  "id": "2237f8d7-e81e-499b-8cf8-cc3ada89f064"
+  "id": "2237f8d7-e81e-499b-8cf8-cc3ada89f064",
+  "published": true
 }
