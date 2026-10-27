@@ -1,0 +1,147 @@
+{
+  "buckets": {},
+  "services": {
+    "fa2b050e-b1df-4b01-b4f8-b77e346b2550": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/rackula/main/icon.png",
+      "name": "Rackula",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/api/health",
+        "healthcheckTimeout": 300,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "ghcr.io/rackulalives/rackula:26.10.1"
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>": {}
+        }
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "8080",
+          "description": "Port nginx listens on.",
+          "isOptional": false
+        },
+        "RACKULA_LISTEN_PORT": {
+          "defaultValue": "8080",
+          "description": "Same as PORT; read by Rackula's nginx config.",
+          "isOptional": false
+        },
+        "API_HOST": {
+          "defaultValue": "${{API.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "API service on the private network.",
+          "isOptional": false
+        },
+        "API_PORT": {
+          "defaultValue": "3001",
+          "description": "API port.",
+          "isOptional": false
+        },
+        "API_WRITE_TOKEN": {
+          "defaultValue": "${{API.RACKULA_API_WRITE_TOKEN}}",
+          "description": "Injected by nginx on writes so only the frontend can change layouts.",
+          "isOptional": false
+        },
+        "RACKULA_AUTH_MODE": {
+          "defaultValue": "local",
+          "description": "local = username/password sign-in. Set to none on both services to make the app public.",
+          "isOptional": false
+        },
+        "RACKULA_STORAGE_MODE": {
+          "defaultValue": "server",
+          "description": "Layouts are saved on the API volume, not in the browser.",
+          "isOptional": false
+        },
+        "RACKULA_TRUST_PROXY": {
+          "defaultValue": "1",
+          "description": "Railway's edge terminates HTTPS; use X-Forwarded-Proto for redirects.",
+          "isOptional": false
+        },
+        "NGINX_RESOLVER": {
+          "defaultValue": "[fd12::10] ipv6=off",
+          "description": "Railway's internal DNS for resolving the API.",
+          "isOptional": false
+        }
+      }
+    },
+    "a3bf440f-c075-49db-a848-ab06ac2ef0f7": {
+      "icon": "https://raw.githubusercontent.com/two-workspaces/rackula/main/icon.png",
+      "name": "API",
+      "deploy": {
+        "startCommand": null,
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 300,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10
+      },
+      "source": {
+        "image": "ghcr.io/rackulalives/rackula-api:26.10.1"
+      },
+      "volumeMounts": {
+        "a3bf440f-c075-49db-a848-ab06ac2ef0f7": {
+          "mountPath": "/data"
+        }
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "3001",
+          "description": "API port.",
+          "isOptional": false
+        },
+        "RACKULA_API_PORT": {
+          "defaultValue": "3001",
+          "description": "API port (read by Rackula).",
+          "isOptional": false
+        },
+        "DATA_DIR": {
+          "defaultValue": "/data",
+          "description": "Layouts and device images on the volume.",
+          "isOptional": false
+        },
+        "RAILWAY_RUN_UID": {
+          "defaultValue": "0",
+          "description": "The image runs as a non-root user; Railway volumes mount root-owned.",
+          "isOptional": false
+        },
+        "RACKULA_LOCAL_USERNAME": {
+          "defaultValue": "admin",
+          "description": "Sign-in username.",
+          "isOptional": false
+        },
+        "RACKULA_LOCAL_PASSWORD": {
+          "defaultValue": "${{secret(24)}}",
+          "description": "Sign-in password (min 12 chars). Change it here and redeploy the API.",
+          "isOptional": false
+        },
+        "RACKULA_AUTH_MODE": {
+          "defaultValue": "local",
+          "description": "Must match the Rackula service.",
+          "isOptional": false
+        },
+        "RACKULA_AUTH_SESSION_SECRET": {
+          "defaultValue": "${{secret(48)}}",
+          "description": "Signs session cookies. Changing it signs everyone out.",
+          "isOptional": false
+        },
+        "RACKULA_API_WRITE_TOKEN": {
+          "defaultValue": "${{secret(48)}}",
+          "description": "Bearer token for write routes; the frontend's nginx adds it.",
+          "isOptional": false
+        },
+        "RACKULA_TRUST_PROXY": {
+          "defaultValue": "true",
+          "description": "Trust X-Real-IP from Rackula's nginx for rate limiting.",
+          "isOptional": false
+        },
+        "CORS_ORIGIN": {
+          "defaultValue": "https://${{Rackula.RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Browser origin allowed to call the API. Update it when you add a custom domain.",
+          "isOptional": false
+        }
+      }
+    }
+  }
+}
